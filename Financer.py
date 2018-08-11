@@ -356,6 +356,10 @@ def see_overall_balance( w:Worker.Worker ) ->None:
     ))
     print()
         
+def prompt_new_daw( w:Worker.Worker ) ->None:
+    """
+    Ask the worker if he wants to add a new day to his month
+    """
         
 
 if __name__ == "__main__":
