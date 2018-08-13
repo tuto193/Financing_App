@@ -1,5 +1,5 @@
 import Worker
-import json
+import pickle
 from pathlib import Path
 
 MIN_WAGE: float = 8.84
@@ -11,7 +11,7 @@ def exists( fileName:str ) -> bool:
     """
     Check whether the given fileName exists
     """
-    fname = fileName + ".txt"
+    fname = fileName + ".pkl"
     my_file = Path(fname)
     return my_file.exists()
 
@@ -23,8 +23,8 @@ def get_worker_from_file( fileName:str ) -> Worker.Worker:
     if not exists(fileName):
         print("The FileName given does not exist")
         return None
-    with open( fileName+".txt", "r", encoding="utf-8") as file:
-        return json.load(file)
+    with open( fileName+".pkl", "rb") as file:
+        return pickle.load(file)
 
 def write_worker_to_file( worker:Worker.Worker ):
     """
@@ -32,11 +32,11 @@ def write_worker_to_file( worker:Worker.Worker ):
     """
     name = fill_spaces(worker.name)
     if exists(name):
-        with open(name + ".txt", "r+", encoding="utf-8") as file:
-            json.dump(worker, file)
+        with open(name + ".pkl", "wb") as file:
+            pickle.dump(worker, file, pickle.HIGHEST_PROTOCOL)
     else:
-        with open(name+".txt", "x", encoding="utf-8") as file:
-            json.dump(worker, file )
+        with open(name+".pkl", "xb") as file:
+            pickle.dump(worker, file, pickle.HIGHEST_PROTOCOL )
 
 def assign_job( worker: Worker.Worker(), jobDesc:list ):
     """
