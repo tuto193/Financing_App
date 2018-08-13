@@ -28,6 +28,11 @@ class Job(object):
         self.__income = 0.0
         self.actual_month: int = 0
 
+    def get_curr_month(self) ->str:
+        """
+        Returns a String with the current month
+        """
+        return months[self.actual_month]
 
     def set_act_month(self, month:str="jan"):
         """

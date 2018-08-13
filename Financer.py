@@ -240,28 +240,33 @@ def prompt_new_month( w:Worker.Worker ) ->None:
             print('''Do you want to see how your this last month looked like?''')
             e:bool = yes_or_no()
             if e:
-                print('''Your previous month looked like this:''')
-                print_month_pretty(w)
+                prompt_month_pretty(w)
         #Start a new month no matter the previous outcome
         w.start_new_month()
     print()
 
-def print_month_pretty( w:Worker.Worker ) ->None:
+def prompt_month_pretty( w:Worker.Worker ) ->None:
     """
     Print an overview of this month
     """
-    #Hours worked
-    print('These are your hours worked')
-    print_dict_pretty(w.get_hours_month)
-    #Income, Expected and Balance
-    inc:float = w.get_income
-    exp:float = w.get_monthly_expected
-    bal:float = w.get_balance
-    print()
-    print('''You Expected to earn: %s€
-    Actually got : %s€
-    That makes it a balance of :%s€'''
-    %(exp, inc, bal) )
+    print('''Do you want to see your current month?''')
+    d:bool = yes_or_no()
+    if d:
+        #Hours worked
+        print('These are your hours worked:')
+        print_dict_pretty(w.get_hours_month())
+        #Income, Expected and Balance
+        exp:float = w.get_monthly_expected()
+        plus:float = add_values_dict(w.earnings)
+        minus:float = add_values_dict(w.expenses)
+        bal:float = exp+plus-minus
+        print()
+        print('''
+        You Expect to earn:         +{expected:>10}€
+        Plus your other earnings:   +{plus:>10}€
+        Minus your expenses:        -{minus:>10}
+        That makes it a balance of : {balance:>10}€'''.format(expected=exp,plus=plus,minus=minus,balance=bal)
+        )
     print()
 
 def modify_earnings( w:Worker.Worker ) ->None:
@@ -356,11 +361,23 @@ def see_overall_balance( w:Worker.Worker ) ->None:
     ))
     print()
         
-def prompt_new_daw( w:Worker.Worker ) ->None:
+def prompt_new_day( w:Worker.Worker ) ->None:
     """
     Ask the worker if he wants to add a new day to his month
     """
-        
+    print('''Do you want to add a NEW (worked) day to your MONTH(%s)?''' %( w.job.get_curr_month() ) )
+
+    d:bool = yes_or_no()
+    if d:
+        day = input("Enter the date and amount of hours: [DD-MM-YYYY hh]").split()
+        hours:float = float(day[1])
+        date:str = day[0]
+        w.job.add_workday(date,hours)
+        if w.job.special_pay():
+            hourN = float(input("How many hours at night?"))
+            hourH = float( input( "How many hours on a holiday?" ) )
+            w.job.add_night(hourN)
+            w.job.add_holyday(hourH)
 
 if __name__ == "__main__":
     new_month:bool = False
@@ -392,15 +409,18 @@ if __name__ == "__main__":
         workingPerson = Worker.Worker(workerName)
 
         prompt_new_job(workingPerson)
-        new_month = True
         
     while True:
         inc:float = workingPerson.get_income
 
+        #See current month before starting
+        prompt_month_pretty(workingPerson)
+        #Add another day to the month?
+        prompt_new_day(workingPerson)
         #Start a new Month?
-        if not new_month:
-            prompt_new_month(workingPerson)
-            new_month = True
+        prompt_new_month(workingPerson)
+        #Show the current month?
+
         #Show income
         if not inc:
             print("You got %s€ this month")
